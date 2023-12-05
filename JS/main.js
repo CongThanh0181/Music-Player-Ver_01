@@ -33,6 +33,7 @@ const app = {
     isPlay: false,
     isRepeat: false,
     isRandom: false,
+    listPlayed: [],
 
 
     //các method
@@ -41,7 +42,7 @@ const app = {
         let htmls = dataMusic.map((element, index) => {
             let html = 
                 `<div class="playlist-item" data-index="${index}">
-                    <div class="item-thumb" style="background-image: url(${element.imageUrl}), url(../Image/cd-thumb.png)"></div>
+                    <div class="item-thumb" style="background-image: url(${element.imageUrl}), url(./Image/cd-thumb.png)"></div>
                     <div class="info-music">
                     <h2 class="music-name">${element.musicName}</h2>
                     <span class="music-singer">${element.singer}</span>
@@ -68,11 +69,13 @@ const app = {
 
     //load current song lên music player
     loadCurrentSong: function(){
+        //Phần player
         songName.innerHTML = dataMusic[this.currentIndex].musicName;
         cdThumb.style.backgroundImage = `url(${dataMusic[this.currentIndex].imageUrl}), url(../Image/cd-thumb.png)`;
         audio.src = dataMusic[this.currentIndex].songUrl;
-        currentTime.innerHTML = `0:0`;
+        currentTime.innerHTML = `0:00`;
         totalTime.innerHTML = `0:00`;
+        progress.value = 0;
 
         //active item của danh sách nhạc
         let listSong = $$('.playlist-item');
@@ -83,7 +86,22 @@ const app = {
                 element.classList.remove('active-item-list');
             }
         });
-        
+
+        //lưu bài đã phát
+        app.listPlayed.push(app.currentIndex);
+        if(app.listPlayed.length === dataMusic.length){
+            app.listPlayed = [];
+        }
+        console.log(app.listPlayed)
+    },
+
+    //Random song
+    randomCurrentIndex: function() {
+        let newCurrentIndex;
+        do{
+            newCurrentIndex = Math.floor(Math.random() * dataMusic.length);
+        }while(app.listPlayed.includes(newCurrentIndex));
+        return newCurrentIndex;
     },
 
     //Next song
@@ -94,7 +112,7 @@ const app = {
                     app.currentIndex = 0;
                 }
             }else{
-                app.currentIndex = Math.floor(Math.random() * dataMusic.length);
+                app.currentIndex = app.randomCurrentIndex();
             }
 
             app.loadCurrentSong();
@@ -110,7 +128,7 @@ const app = {
                 app.currentIndex = dataMusic.length-1;
             }
         }else{
-            app.currentIndex = Math.floor(Math.random() * dataMusic.length);
+            app.currentIndex = app.randomCurrentIndex();
         }
 
         app.loadCurrentSong();
